@@ -94,9 +94,12 @@ def main():
             start_time = time.time()
             composite = coco_demo.run_on_opencv_image(img, current_frame)
             print("Time: {:.2f} s / img".format(time.time() - start_time))
-            cv2.imshow("Detections", composite)
-            if cv2.waitKey(1) == 27:
-                break  # esc to quit
+            cv2.imwrite(str(current_frame)+'.png',composite)
+
+            # cv2.imshow("Detections", composite)
+            # if cv2.waitKey(1) == 27:
+            #     break  # esc to quit
+                
             current_frame += 1
 
     cv2.destroyAllWindows()

@@ -1,6 +1,6 @@
 # MaskRCNN + Deep Sort
 
-> SLAM和深度学习结合是一个发展趋势，目前已有许多这方面的研究工作。通常目标检测/语义分割/实例分割用来提供语义观测，目标追踪用来提供数据关联，从而应用于一个SLAM系统中。本仓库实现语义SLAM中的关键部分，即实例分割和目标追踪功能，代码主要来自[maskrcnn-benchmark](https://github.com/umbertogriffo/maskrcnn-benchmark) 和 [deep_sort](https://github.com/nwojke/deep_sort)。仅为个人学习使用，仍有许多地方需要完善。更详细的安装和使用说明请参考maskrcnn和deep sort原仓库。
+SLAM和深度学习结合是一个发展趋势，目前已有许多这方面的研究工作。通常目标检测/语义分割/实例分割用来提供语义观测，目标追踪用来提供数据关联，从而应用于一个SLAM系统中。本仓库实现语义SLAM中的关键部分，即实例分割和目标追踪功能，代码主要来自[maskrcnn-benchmark](https://github.com/umbertogriffo/maskrcnn-benchmark) 和 [deep_sort](https://github.com/nwojke/deep_sort)。仅为个人学习使用，仍有许多地方需要完善。更详细的安装和使用说明请参考maskrcnn和deep sort原仓库。
 
 ## 依赖与安装
 

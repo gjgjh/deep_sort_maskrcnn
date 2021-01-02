@@ -1,5 +1,6 @@
 # compilation and distribution
 __pycache__
+.idea
 _ext
 *.pyc
 *.so

@@ -84,25 +84,18 @@ def main():
     success = True
 
     while success:
-
-        print("current_frame: ", current_frame)
+        print("Current frame: ", current_frame)
 
         # Read next image
         success, img = cam.read()
 
         if success:
             start_time = time.time()
-            composite = coco_demo.run_on_opencv_image(img, current_frame)
-            print("Time: {:.2f} s / img".format(time.time() - start_time))
-            cv2.imwrite(str(current_frame)+'.png',composite)
+            visualize, prediction, tracking = coco_demo.run_on_opencv_image(img, current_frame)
+            print("Processing time: {:.2f} s".format(time.time() - start_time))
 
-            # cv2.imshow("Detections", composite)
-            # if cv2.waitKey(1) == 27:
-            #     break  # esc to quit
-                
+            coco_demo.saveResults(str(current_frame).zfill(6), visualize, prediction, tracking)
             current_frame += 1
-
-    cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":

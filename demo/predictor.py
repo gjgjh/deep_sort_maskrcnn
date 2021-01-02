@@ -172,12 +172,19 @@ class COCODemo(object):
     def run_on_opencv_image(self, image, current_frame=0):
         """
         Arguments:
-            image (np.ndarray): an image as returned by OpenCV
+            image (np.ndarray): original image
+
+            current_frame (int): current frame ID
 
         Returns:
-            prediction (BoxList): the detected objects. Additional information
+            result (np.ndarray): visualizing image
+
+            top_predictions (BoxList): the filtered detection results. Additional information
                 of the detection properties can be found in the fields of
-                the BoxList via `prediction.fields()`
+                the BoxList via `top_predictions.fields()`
+
+            trackings (np.ndarray): all tracking IDs in current frame
+
         """
         predictions = self.compute_prediction(image)
         top_predictions = self.select_top_predictions(predictions)
@@ -187,7 +194,7 @@ class COCODemo(object):
             return self.create_mask_montage(result, top_predictions)
         if self.cfg.MODEL.MASK_ON:
             if self.cfg.TRACKER.ENABLE:
-                self.track_objects_from_video(result, top_predictions, current_frame)
+                tracking = self.track_objects_from_video(result, top_predictions, current_frame)
             result = self.overlay_mask(result, top_predictions)
         if self.cfg.MODEL.KEYPOINT_ON:
             result = self.overlay_keypoints(result, top_predictions)
@@ -195,7 +202,7 @@ class COCODemo(object):
         result = self.overlay_boxes(result, top_predictions)
         result = self.overlay_class_names(result, top_predictions)
 
-        return result
+        return result, top_predictions, tracking
 
     def compute_prediction(self, original_image):
         """
@@ -338,9 +345,13 @@ class COCODemo(object):
             predictions (BoxList): the result of the computation by the model.
                 It should contain the field `mask`.
             param current_frame (int): id of the current frame.
+
+        Returns:
+            trackings (np.ndarray): all tracking IDs in current frame
         """
 
         detections = []
+        trackings = []
 
         extracted_objects_path = os.path.join(self.cfg.OUTPUT_DIR, "extracted_object")
         if not os.path.exists(extracted_objects_path):
@@ -365,7 +376,10 @@ class COCODemo(object):
         for id, track_bbox in enumerate(tracks):
 
             if len(track_bbox.tlwh) == 0:
+                trackings.append(0)
                 continue
+            else:
+                trackings.append(track_bbox.track_id)
 
             object_path = os.path.join(extracted_objects_path, str(track_bbox.track_id))
             if not os.path.exists(object_path):
@@ -403,9 +417,9 @@ class COCODemo(object):
             # draw track on the frame
             min_x, min_y, max_x, max_y = track_bbox.to_tlbr().astype(int)
             cv2.rectangle(image, (min_x, min_y), (max_x, max_y), (255, 0, 0), 1)
-            cv2.putText(image, "Track:{}".format(str(track_bbox.track_id)), (min_x, max_y+10), cv2.FONT_HERSHEY_SIMPLEX,
-                        .5,
-                        (255, 255, 255), 1)
+            cv2.putText(image, "Track:{}".format(str(track_bbox.track_id)), (min_x, max_y + 10), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 255, 255), 1)
+
+        return np.asarray(trackings)
 
     def overlay_keypoints(self, image, predictions):
         keypoints = predictions.get_field("keypoints")
@@ -476,6 +490,49 @@ class COCODemo(object):
             )
 
         return image
+
+    def saveResults(self, filename, image, prediction, tracking):
+        """
+        Arguments:
+            filename (str): filename without extension
+            image (np.ndarray): an image as returned by OpenCV
+            predictions (BoxList): the result of the computation by the model.
+                It should contain the field `scores` and `labels`.
+            trackings (np.ndarray): all tracking IDs in current frame
+        """
+
+        cv2.imwrite(filename + '.png', image)
+        rows, cols, _ = image.shape
+
+        mask = prediction.get_field('mask')
+        scores = prediction.get_field('scores')
+        labels = prediction.get_field('labels')
+
+        # filter out non-tracked objects
+        num_objects = np.count_nonzero(tracking)
+        mask = mask[np.nonzero(tracking)]
+        scores = scores[np.nonzero(tracking)]
+        labels = labels[np.nonzero(tracking)]
+        tracking = tracking[np.nonzero(tracking)]
+
+        mask_combine = torch.zeros(rows, cols)
+        for i in range(num_objects):
+            trackingID = tracking[i].item()
+            mask_combine[mask[i, 0].type(torch.BoolTensor)] = trackingID
+
+        # save results in certain format
+        with open(filename + '.txt', 'w') as out:
+            out.writelines(str(num_objects) + '\n')
+
+            for i in range(num_objects):
+                trackingID = tracking[i].item()
+                label = labels[i].item()
+                score = scores[i].item()
+                out.write('%d %d %.2f\n' % (trackingID, label, score))
+
+            out.write('%d %d\n' % (rows, cols))
+
+            np.savetxt(out, mask_combine, newline='\n', fmt='%d')
 
 
 import numpy as np

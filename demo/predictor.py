@@ -501,7 +501,11 @@ class COCODemo(object):
             trackings (np.ndarray): all tracking IDs in current frame
         """
 
-        cv2.imwrite(filename + '.png', image)
+        visualize_path = os.path.join(self.cfg.OUTPUT_DIR, "visualize")
+        if not os.path.exists(visualize_path):
+            os.makedirs(visualize_path)
+
+        cv2.imwrite(os.path.join(visualize_path, filename + '.png'), image)
         rows, cols, _ = image.shape
 
         mask = prediction.get_field('mask')
@@ -520,8 +524,12 @@ class COCODemo(object):
             trackingID = tracking[i].item()
             mask_combine[mask[i, 0].type(torch.BoolTensor)] = trackingID
 
+        semantic_path = os.path.join(self.cfg.OUTPUT_DIR, "semantic")
+        if not os.path.exists(semantic_path):
+            os.makedirs(semantic_path)
+
         # save results in certain format
-        with open(filename + '.txt', 'w') as out:
+        with open(os.path.join(semantic_path, filename + '.txt'), 'w') as out:
             out.writelines(str(num_objects) + '\n')
 
             for i in range(num_objects):

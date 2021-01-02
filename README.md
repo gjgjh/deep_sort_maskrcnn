@@ -77,7 +77,27 @@ python video_multi_object_tracking.py --video-file "<path_to_video>" --config-fi
 python video_multi_object_tracking.py --video-file "<path_to_video>" --config-file "../configs/caffe2/e2e_mask_rcnn_R_101_FPN_1x_caffe2.yaml" --confidence-threshold 0.7 --min-image-size 800 MODEL.DEVICE cuda MODEL.MASK_ON True TRACKER.ENABLE True TRACKER.EXTRACT_FROM_MASK.ENABLE True TRACKER.EXTRACT_FROM_MASK.TRANSPARENT True  TRACKER.EXTRACT_FROM_MASK.DSIZE 800
 ```
 
-结果默认保存在demo文件夹下。
+运行后，结果默认保存在demo文件夹下：
+
+- `extracted_object`：分开保存了每个跟踪到的object的图像
+
+- `visualize`：保存了用于可视化的每帧图像
+
+- `semantic`：保存了跟踪和实例分割的结果。示例格式如下：
+
+  ```
+  num_objects
+  objectID1 label1 confidence1
+  objectID2 label2 confidence2
+  ...
+  rows cols
+  0 0 0 0 0 ... 0 objectID1 0
+  objectID2 0 0 0 0 ... 0 objectID1 0
+  objectID2 0 0 0 0 ... 0 0 0
+  0 0 0 0 0 ... 0 0 0
+  ```
+
+  第一行为当前帧**检测并跟踪**到的object数量，下面num_objects行分别为每一个object的ID、类别和置信度。接下来一行为图像的行列号。最后是rows x cols大小的实例分割图像。其中0表示背景或被忽略的结果，非0值为object的ID，用来表示object实例分割结果。
 
 ## 示例结果
 

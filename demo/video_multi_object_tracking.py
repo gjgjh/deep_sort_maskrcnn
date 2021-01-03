@@ -76,26 +76,34 @@ def main():
         width = cam.get(cv2.CAP_PROP_FRAME_WIDTH)  # float
         height = cam.get(cv2.CAP_PROP_FRAME_HEIGHT)  # float
         fps = cam.get(cv2.CAP_PROP_FPS)
-        print("width {0:f}:".format(width))
-        print("height {0:f}:".format(height))
-        print("fps {0:f}:".format(fps))
+        num_frame = cam.get(cv2.CAP_PROP_FRAME_COUNT)
+        print("VIDEO INFO:")
+        print("Width %f, Height %f, FPS %f, Frame_number %f\n" % (width, height, fps, num_frame))
 
     current_frame = 0
     success = True
 
     while success:
-        print("Current frame: ", current_frame)
-
-        # Read next image
         success, img = cam.read()
-
         if success:
             start_time = time.time()
             visualize, prediction, tracking = coco_demo.run_on_opencv_image(img, current_frame)
-            print("Processing time: {:.2f} s".format(time.time() - start_time))
+            print("%d / %d, processing time: %.2fs" % (current_frame, num_frame, time.time() - start_time))
 
             coco_demo.saveResults(str(current_frame).zfill(6), visualize, prediction, tracking)
             current_frame += 1
+
+    # while success:
+    #     success, img = cam.read()
+    #     if success:
+    #         start_time = time.time()
+    #
+    #         if current_frame > 570:
+    #             visualize, prediction, tracking = coco_demo.run_on_opencv_image(img, current_frame)
+    #             coco_demo.saveResults(str(current_frame).zfill(6), visualize, prediction, tracking)
+    #
+    #         print("%d / %d, processing time: %.2fs" % (current_frame, num_frame, time.time() - start_time))
+    #         current_frame += 1
 
 
 if __name__ == "__main__":

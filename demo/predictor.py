@@ -362,6 +362,9 @@ class COCODemo(object):
         scores = predictions.get_field("scores").numpy()
         height, width, _ = image.shape
 
+        if masks.size == 0 or bboxs.size == 0 or scores.size == 0:
+            return np.asarray(trackings)
+
         # Append detections
         for i, (mask, bbox, score) in enumerate(zip(masks, bboxs, scores)):
             x1, y1, w, h = bbox[0:4]
@@ -373,20 +376,24 @@ class COCODemo(object):
 
         # Get the tracks
         tracks = self.tracker.tracks
-        for id, track_bbox in enumerate(tracks):
-
-            if len(track_bbox.tlwh) == 0:
-                trackings.append(0)
+        for id, track in enumerate(tracks):
+            if not track.is_confirmed() or track.time_since_update >= 1:
                 continue
-            else:
-                trackings.append(track_bbox.track_id)
 
-            object_path = os.path.join(extracted_objects_path, str(track_bbox.track_id))
+            # if len(track.tlwh) == 0:
+            #     trackings.append(0)
+            #     continue
+            # else:
+            #     trackings.append(track.track_id)
+
+            trackings.append(track.track_id)
+
+            object_path = os.path.join(extracted_objects_path, str(track.track_id))
             if not os.path.exists(object_path):
                 os.makedirs(object_path)
 
             # get the mask
-            thresh = track_bbox.mask
+            thresh = track.mask
             object_points = cv2.findNonZero(thresh)
             x, y, w, h = cv2.boundingRect(object_points)
 
@@ -415,9 +422,9 @@ class COCODemo(object):
                     cv2.imwrite(name, masked_img)
 
             # draw track on the frame
-            min_x, min_y, max_x, max_y = track_bbox.to_tlbr().astype(int)
+            min_x, min_y, max_x, max_y = track.to_tlbr().astype(int)
             cv2.rectangle(image, (min_x, min_y), (max_x, max_y), (255, 0, 0), 1)
-            cv2.putText(image, "Track:{}".format(str(track_bbox.track_id)), (min_x, max_y + 10), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 255, 255), 1)
+            cv2.putText(image, "Track:{}".format(str(track.track_id)), (min_x, max_y + 10), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 255, 255), 1)
 
         return np.asarray(trackings)
 

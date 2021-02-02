@@ -20,7 +20,6 @@ class DatasetCatalog(object):
     @staticmethod
     def get(name):
         if "coco" in name:
-            print('******** '+name)
             data_dir = DatasetCatalog.DATA_DIR
             attrs = DatasetCatalog.DATASETS[name]
             args = dict(

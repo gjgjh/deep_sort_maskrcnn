@@ -103,3 +103,13 @@ python video_multi_object_tracking.py --video-file "<path_to_video>" --config-fi
 
 <img src="./demo/tracking.gif" width = 40% height = 40% />
 
+## 训练自己数据集
+
+- 将数据集制作成COCO格式，并将图片和标注文件存放在`datasets`文件夹下
+- 修改`myconfigs`文件夹下相应配置文件。其中，`paths_catalog.py`主要是设置数据集路径，
+`*.yaml`文件主要设置权重文件、类别个数、输出路径、学习率等超参数。
+- 设置完后，就可以输入下面的命令进行训练：
+
+```bash
+python -W ignore tools/train_net.py --config-file myconfigs/e2e_mask_rcnn_R_101_FPN_1x_caffe2.yaml
+```

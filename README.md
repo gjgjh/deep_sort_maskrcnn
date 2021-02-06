@@ -26,7 +26,7 @@ conda activate maskrcnn_benchmark
 pip install ninja yacs cython matplotlib tqdm opencv-python scikit-learn==0.22.2
 
 # install pytorch
-conda install pytorch==1.2.0 torchvision==0.4.0 cudatoolkit=10.0 -c pytorch
+conda install pytorch==1.1.0 torchvision==0.2.1 cudatoolkit=10.0 -c pytorch
 
 mkdir maskrcnn && cd maskrcnn
 export INSTALL_DIR=$PWD
@@ -107,9 +107,16 @@ python video_multi_object_tracking.py --video-file "<path_to_video>" --config-fi
 
 - 将数据集制作成COCO格式，并将图片和标注文件存放在`datasets`文件夹下
 - 修改`myconfigs`文件夹下相应配置文件。其中，`paths_catalog.py`主要是设置数据集路径，
-`*.yaml`文件主要设置权重文件、类别个数、输出路径、学习率等超参数。
-- 设置完后，就可以输入下面的命令进行训练：
+`*.yaml`文件主要设置权重文件、类别个数、输出路径、学习率等超参数。如果不使用预训练权重，将配置文件中`WEIGHT`设置为`“”`。
+- Finetune (可选): 使用下面的命令对预训练模型进行修改。修改完成后，将配置文件中`WEIGHT`设置为`"./pretrained.pth"`即可。
+```bash
+cd utils
+python trim_detectron_model.py --pretrained_path ~/.torch/models/*.pkl --save_path ../pretrained.pth --cfg ../myconfigs/e2e_mask_rcnn_R_101_FPN_1x_caffe2.yaml
+```
+- 最后，输入下面的命令进行训练：
 
 ```bash
 python -W ignore tools/train_net.py --config-file myconfigs/e2e_mask_rcnn_R_101_FPN_1x_caffe2.yaml
 ```
+
+> 本节参考链接：[Step-by-step tutorial - How to train your own dataset](https://github.com/facebookresearch/maskrcnn-benchmark/issues/521)，[How to finetune from pretrained detectron models with different number of classes?](https://github.com/facebookresearch/maskrcnn-benchmark/issues/15)

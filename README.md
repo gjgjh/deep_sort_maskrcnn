@@ -9,7 +9,7 @@ SLAM和深度学习结合是一个发展趋势，目前已有许多这方面的�
 本仓库依赖以下第三方库，并只在以下特定版本上进行了测试。
 
 - PyTorch 1.2.0
-- torchvision 0.4.0
+- torchvision 0.2.1
 - cocoapi 2.0
 - yacs 0.1.8
 - matplotlib 3.3.3
@@ -111,12 +111,21 @@ python video_multi_object_tracking.py --video-file "<path_to_video>" --config-fi
 - Finetune (可选): 使用下面的命令对预训练模型进行修改。修改完成后，将配置文件中`WEIGHT`设置为`"./pretrained.pth"`即可。
 ```bash
 cd utils
-python trim_detectron_model.py --pretrained_path ~/.torch/models/*.pkl --save_path ../pretrained.pth --cfg ../myconfigs/e2e_mask_rcnn_R_101_FPN_1x_caffe2.yaml
+python trim_detectron_model.py --pretrained_path ~/.torch/models/_detectron_35861795_12_2017_baselines_e2e_mask_rcnn_R-101-FPN_1x.yaml.02_31_37.KqyEK4tT_output_train_coco_2014_train%3Acoco_2014_valminusminival_generalized_rcnn_model_final.pkl --save_path ../pretrained.pth --cfg ../myconfigs/e2e_mask_rcnn_R_101_FPN_1x_caffe2.yaml
 ```
 - 最后，输入下面的命令进行训练：
 
 ```bash
-python -W ignore tools/train_net.py --config-file myconfigs/e2e_mask_rcnn_R_101_FPN_1x_caffe2.yaml
+python -W ignore tools/train_net.py --config-file myconfigs/e2e_mask_rcnn_R_101_FPN_1x_caffe2_finetune.yaml
 ```
 
 > 本节参考链接：[Step-by-step tutorial - How to train your own dataset](https://github.com/facebookresearch/maskrcnn-benchmark/issues/521)，[How to finetune from pretrained detectron models with different number of classes?](https://github.com/facebookresearch/maskrcnn-benchmark/issues/15)
+
+## 评估实例分割精度
+
+修改配置文件中`WEIGHT`为训练好的模型路径，然后使用下面的命令进行评估，最终PR-curve图像会保存在当前目录下：
+
+```bash
+python -W ignore tools/test_net.py --config-file myconfigs/e2e_mask_rcnn_R_101_FPN_1x_caffe2.yaml
+```
+

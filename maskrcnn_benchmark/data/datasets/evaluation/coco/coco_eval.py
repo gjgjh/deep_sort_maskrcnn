@@ -2,6 +2,8 @@ import logging
 import tempfile
 import os
 import torch
+import numpy as np
+import matplotlib.pyplot as plt
 from collections import OrderedDict
 from tqdm import tqdm
 
@@ -320,6 +322,26 @@ def evaluate_predictions_on_coco(
     coco_eval.evaluate()
     coco_eval.accumulate()
     coco_eval.summarize()
+
+    # draw PR-curve
+    if iou_type == 'segm':
+        all_precision = coco_eval.eval['precision']
+        pr_5 = all_precision[0, :, 0, 0, 2]  # data for IoU=0.5
+        pr_7 = all_precision[4, :, 0, 0, 2]  # data for IoU=0.7
+        pr_9 = all_precision[8, :, 0, 0, 2]  # data for IoU=0.9
+        x = np.arange(0, 1.01, 0.01)
+        plt.xlabel('recall')
+        plt.ylabel('precision')
+        plt.xlim(0, 1.0)
+        plt.ylim(0, 1.01)
+        plt.grid(True)
+
+        plt.plot(x, pr_5, 'b-', label='IoU=0.5')
+        plt.plot(x, pr_7, 'c-', label='IoU=0.7')
+        plt.plot(x, pr_9, 'y-', label='IoU=0.9')
+        plt.legend(loc='lower left')
+        plt.savefig('PR_Curve.png')
+
     return coco_eval
 
 

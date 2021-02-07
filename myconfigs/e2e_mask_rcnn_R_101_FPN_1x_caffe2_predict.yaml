@@ -1,6 +1,6 @@
 MODEL:
   META_ARCHITECTURE: "GeneralizedRCNN"
-  WEIGHT: "../model_0001000.pth"
+  WEIGHT: "../model_final.pth"
   BACKBONE:
     CONV_BODY: "R-101-FPN"
   RESNETS:
